@@ -10,4 +10,5 @@ https://www.youtube.com/watch?v=tvacC2sJmdU<br>
 http://dcc.client.jp/e725_201.html<br>
 ブログで紹介<br>
 http://ayabu.blog.shinobi.jp/attiny85dcc/<br>
- 
+<br>
+2020/11/15 NmraDccライブラリを最新版に差し替え<br>

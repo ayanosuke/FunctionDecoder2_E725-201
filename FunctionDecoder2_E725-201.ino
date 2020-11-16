@@ -2,15 +2,27 @@
 // By yaasan
 // Based on Nicolas's sketch http://blog.nicolas.cx
 // Inspired by Geoff Bunza and his 17 Function DCC Decoder & updated library
-//
+// [FunctionDecoder2_E725-201.ino]
+// Copyright (c) 2020 Ayanosuke(Maison de DCC)
+// By aya.
 // E725-201 function decoder
 // http://1st.geocities.jp/dcc_digital/
 // O1:未使用
 // O2:未使用
 // O3:室内灯 F3でON/OFF
 // O4:パンタスパーク F0でON/OFF
+//
+// http://maison-dcc.sblo.jp/ http://dcc.client.jp/ http://ayabu.blog.shinobi.jp/
+// https://twitter.com/masashi_214
+//
+// DCC電子工作連合のメンバーです
+// https://desktopstation.net/tmi/ https://desktopstation.net/bb/index.php
+//
+// This software is released under the MIT License.
+// http://opensource.org/licenses/mit-license.php
+//--------------------------------------------------------------------------------
 
-#include <NmraDcc.h>
+#include "NmraDcc.h"
 #include <avr/eeprom.h>	 //required by notifyCVRead() function if enabled below
 
 //FX効果
@@ -329,7 +341,7 @@ void PantaSparkEffect_Control(){
         adr = 0;
         timeUp = 0;
         pwmRef = 0;
-        TCCR1 = 1<<CS10;  //分周比をセット
+        TCCR1 = 0<<CS10;  //分周比をセット 0827 0速でも点灯していた対策
         //       OCR1B有効   high出力　
         GTCCR = 1 << PWM1B | 2 << COM1B0;
         analogWrite(O4, 0);
@@ -342,37 +354,37 @@ void PantaSparkEffect_Control(){
         if(gSpeedRef <= 9){
             state = 0;
         } else if(gSpeedRef >= 10 && gSpeedRef <=19 ){
-            nextSparkWait = random(300,300);
+            nextSparkWait = random(200,250);//300,300
             state = 2;
         } else if(gSpeedRef >= 20 && gSpeedRef <=29 ){
-            nextSparkWait = random(200,250);         
+            nextSparkWait = random(150,200);//200,250         
             state = 2;
         } else if(gSpeedRef >= 30 && gSpeedRef <=39 ){
-            nextSparkWait = random(150,200);         
+            nextSparkWait = random(100,160);//150,200         
             state = 2;
         } else if(gSpeedRef >= 40 && gSpeedRef <=49 ){
-            nextSparkWait = random(100,160);            
+            nextSparkWait = random(60,120);//100,160            
             state = 2;
         } else if(gSpeedRef >= 50 && gSpeedRef <=59 ){
-            nextSparkWait = random(60,120);               
+            nextSparkWait = random(35,90);//60,120               
             state = 2;
         } else if(gSpeedRef >= 60 && gSpeedRef <=69 ){
-            nextSparkWait = random(35,90);               
+            nextSparkWait = random(25,60);//35,90               
             state = 2;
         } else if(gSpeedRef >= 70 && gSpeedRef <=79 ){
-            nextSparkWait = random(25,60);               
+            nextSparkWait = random(20,40);//25,60               
             state = 2;
         } else if(gSpeedRef >= 80 && gSpeedRef <=89 ){
-            nextSparkWait = random(20,40);               
+            nextSparkWait = random(10,30);//20,40               
             state = 2;
         } else if(gSpeedRef >= 90 && gSpeedRef <=99 ){
-            nextSparkWait = random(10,30);               
+            nextSparkWait = random(5,20);//10,30               
             state = 2;
         } else if(gSpeedRef >= 100 && gSpeedRef <=109 ){
-            nextSparkWait = random(5,20);               
+            nextSparkWait = random(1,10);//5,20               
             state = 2;
         } else if(gSpeedRef >= 110 && gSpeedRef <=119 ){
-            nextSparkWait = random(1,10);               
+            nextSparkWait = random(1,5);//1,10               
             state = 2;
         } else if(gSpeedRef >= 120 ){
             nextSparkWait = random(1,5);               
@@ -651,11 +663,14 @@ PantaSparkEffect_Control();
 }
 
 //DCC速度信号の受信によるイベント
-extern void notifyDccSpeed( uint16_t Addr, uint8_t Speed, uint8_t ForwardDir, uint8_t MaxSpeed )
+//extern void notifyDccSpeed( uint16_t Addr, uint8_t Speed, uint8_t ForwardDir, uint8_t MaxSpeed )
+extern void notifyDccSpeed( uint16_t Addr, DCC_ADDR_TYPE AddrType, uint8_t Speed, DCC_DIRECTION Dir, DCC_SPEED_STEPS SpeedSteps )
 {
-  if ( gDirection != ForwardDir)
+//if ( gDirection != ForwardDir)
+  if ( gDirection != Dir)
   {
-    gDirection = ForwardDir;
+//  gDirection = ForwardDir;
+    gDirection = Dir;
   }
   gSpeedRef = Speed;
 }
@@ -666,9 +681,9 @@ extern void notifyDccSpeed( uint16_t Addr, uint8_t Speed, uint8_t ForwardDir, ui
 //FN_9_12以降はFUNCTIONボタンが押されたときにイベント発生
 //前値と比較して変化あったら処理するような作り。
 //---------------------------------------------------------------------------
-extern void notifyDccFunc( uint16_t Addr, FN_GROUP FuncGrp, uint8_t FuncState)
+//extern void notifyDccFunc( uint16_t Addr, FN_GROUP FuncGrp, uint8_t FuncState)
+extern void notifyDccFunc(uint16_t Addr, DCC_ADDR_TYPE AddrType, FN_GROUP FuncGrp, uint8_t FuncState)
 {
-
   
   if( FuncGrp == FN_0_4)
   {
@@ -732,5 +747,3 @@ void pulse()
   delay(100);
   digitalWrite(O1, LOW);
 }
-
-
